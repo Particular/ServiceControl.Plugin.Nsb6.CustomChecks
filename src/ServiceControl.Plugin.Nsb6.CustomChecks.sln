@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Plugin.Nsb6.CustomChecks", "ServiceControl.Plugin.CustomChecks\ServiceControl.Plugin.Nsb6.CustomChecks.csproj", "{6526946E-5299-441A-9EC7-C85306FB5F51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Plugin.Nsb6.CustomChecks.Sample", "ServiceControl.Plugin.CustomChecks.Sample\ServiceControl.Plugin.Nsb6.CustomChecks.Sample.csproj", "{12F8A140-A529-42EA-B8F4-C41B4E76F883}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1D5412EE-73ED-4752-AEDA-AEB707A97C40}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6526946E-5299-441A-9EC7-C85306FB5F51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6526946E-5299-441A-9EC7-C85306FB5F51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6526946E-5299-441A-9EC7-C85306FB5F51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6526946E-5299-441A-9EC7-C85306FB5F51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12F8A140-A529-42EA-B8F4-C41B4E76F883}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12F8A140-A529-42EA-B8F4-C41B4E76F883}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12F8A140-A529-42EA-B8F4-C41B4E76F883}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12F8A140-A529-42EA-B8F4-C41B4E76F883}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
