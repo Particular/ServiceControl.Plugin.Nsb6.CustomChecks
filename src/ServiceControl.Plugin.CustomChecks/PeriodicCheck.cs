@@ -1,7 +1,8 @@
 ﻿namespace ServiceControl.Plugin.CustomChecks
 {
     using System;
-    using Internal;
+    using System.Threading.Tasks;
+    using ServiceControl.Plugin.CustomChecks.Internal;
 
     public abstract class PeriodicCheck : IPeriodicCheck
     {
@@ -12,12 +13,12 @@
             Interval = interval;
         }
 
-        public abstract CheckResult PerformCheck();
+        public TimeSpan Interval { get; }
 
-        public TimeSpan Interval { get; private set; }
+        public string Category { get; }
 
-        public string Category { get; private set; }
+        public string Id { get; }
 
-        public string Id { get; private set; }
+        public abstract Task<CheckResult> PerformCheck();
     }
 }

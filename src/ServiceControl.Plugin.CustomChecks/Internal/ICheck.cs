@@ -2,9 +2,9 @@
 {
     using System.Threading.Tasks;
 
-    // needed for DI
-    public interface ICustomCheck : ICheck
+    public interface ICheck
     {
-        Task PerformCheck();
+        string Category { get; }
+        string Id { get; }
     }
 }

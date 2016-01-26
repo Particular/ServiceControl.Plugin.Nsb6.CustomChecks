@@ -2,22 +2,21 @@ namespace ServiceControl.Plugin.CustomChecks.Internal
 {
     using System;
     using System.Threading.Tasks;
-    using NServiceBus;
     using NServiceBus.Logging;
-    using NServiceBus.Settings;
-    using NServiceBus.Transports;
     using ServiceControl.Plugin.CustomChecks.Messages;
 
-    public class TimerBasedPeriodicCheck
+    class TimerBasedPeriodicCheck
     {
         static ILog Logger = LogManager.GetLogger(typeof(TimerBasedPeriodicCheck));
 
-        public TimerBasedPeriodicCheck(IPeriodicCheck periodicCheck, IDispatchMessages messageSender, ReadOnlySettings settings, CriticalError criticalError)
+        public TimerBasedPeriodicCheck(IPeriodicCheck periodicCheck, ServiceControlBackend serviceControlBacked)
         {
             this.periodicCheck = periodicCheck;
-            this.settings = settings;
-            serviceControlBackend = new ServiceControlBackend(messageSender, settings, criticalError);
+            this.serviceControlBackend = serviceControlBacked;
+        }
 
+        public void Start()
+        {
             timer = new AsyncTimer();
             timer.Start(Run, periodicCheck.Interval, e => { /* should not happen */});
         }
@@ -32,18 +31,18 @@ namespace ServiceControl.Plugin.CustomChecks.Internal
             CheckResult result;
             try
             {
-                result = periodicCheck.PerformCheck();
+                result = await periodicCheck.PerformCheck().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                var reason = string.Format("'{0}' implementation failed to run.", periodicCheck.GetType());
+                var reason = $"'{periodicCheck.GetType()}' implementation failed to run.";
                 result = CheckResult.Failed(reason);
                 Logger.Error(reason, ex);
             }
 
             try
             {
-                await ReportToBackend(result, periodicCheck.Id, periodicCheck.Category, TimeSpan.FromTicks(periodicCheck.Interval.Ticks*4)).ConfigureAwait(false);
+                await ReportToBackend(result, TimeSpan.FromTicks(periodicCheck.Interval.Ticks*4)).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -51,26 +50,13 @@ namespace ServiceControl.Plugin.CustomChecks.Internal
             }
         }
 
-        Task ReportToBackend(CheckResult result, string customCheckId, string category, TimeSpan ttr)
+        Task ReportToBackend(CheckResult result, TimeSpan ttr)
         {
-            var reportCustomCheckResult = new ReportCustomCheckResult
-            {
-                HostId = settings.Get<Guid>("NServiceBus.HostInformation.HostId"),
-                Host = settings.Get<string>("NServiceBus.HostInformation.DisplayName"),
-                EndpointName = settings.EndpointName().ToString(),
-                CustomCheckId = customCheckId,
-                Category = category,
-                HasFailed = result.HasFailed,
-                FailureReason = result.FailureReason,
-                ReportedAt = DateTime.UtcNow
-            };
-
-            return serviceControlBackend.Send(reportCustomCheckResult, ttr);
+            return serviceControlBackend.Send(new ReportCustomCheckResult(periodicCheck, result), ttr);
         }
 
         IPeriodicCheck periodicCheck;
         ServiceControlBackend serviceControlBackend;
-        ReadOnlySettings settings;
         AsyncTimer timer;
     }
 }

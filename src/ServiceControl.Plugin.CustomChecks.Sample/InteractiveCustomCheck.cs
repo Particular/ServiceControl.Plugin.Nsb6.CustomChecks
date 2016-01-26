@@ -15,7 +15,8 @@
         }
 
         public static bool ShouldFail { get; set; }
-        public override CheckResult PerformCheck()
+
+        public override Task<CheckResult> PerformCheck()
         {
             return ShouldFail ? CheckResult.Failed("User asked me to fail") : CheckResult.Pass;
         }

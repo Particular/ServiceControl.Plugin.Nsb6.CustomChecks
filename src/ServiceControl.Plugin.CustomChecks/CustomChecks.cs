@@ -42,11 +42,14 @@
 
                 foreach (var check in periodicChecks)
                 {
-                    timerPeriodicChecks.Add(new TimerBasedPeriodicCheck(check, Dispatcher, Settings, CriticalError));
+                    var timerBasedPeriodicCheck = new TimerBasedPeriodicCheck(check, new ServiceControlBackend(Dispatcher, Settings, CriticalError));
+                    timerBasedPeriodicCheck.Start();
+
+                    timerPeriodicChecks.Add(timerBasedPeriodicCheck);
                 }
 
                 customChecks = Builder.BuildAll<ICustomCheck>().ToList();
-                return Task.FromResult(0);
+                return Task.WhenAll(customChecks.Select(c => c.PerformCheck()));
             }
 
             protected override Task OnStop(IBusSession session)

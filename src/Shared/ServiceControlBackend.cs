@@ -18,6 +18,7 @@
     using NServiceBus.Transports;
     using NServiceBus.Unicast.Transport;
     using ServiceControl.Plugin.CustomChecks.Internal;
+    using ServiceControl.Plugin.CustomChecks.Messages;
 
     class ServiceControlBackend
     {
@@ -41,26 +42,28 @@
                             "\r\n", ex));
         }
 
-        public async Task Send(object messageToSend, TimeSpan timeToBeReceived)
+        public async Task Send(ReportCustomCheckResult result, TimeSpan timeToBeReceived)
         {
+            result.Apply(settings);
+
             byte[] body;
             using (var stream = new MemoryStream())
             {
-                serializer.Serialize(new[] { messageToSend }, stream);
+                serializer.Serialize(new[] { result }, stream);
                 body = stream.ToArray();
             }
 
             //hack to remove the type info from the json
             var bodyString = Encoding.UTF8.GetString(body);
 
-            var toReplace = ", " + messageToSend.GetType().Assembly.GetName().Name;
+            var toReplace = ", " + result.GetType().Assembly.GetName().Name;
 
             bodyString = bodyString.Replace(toReplace, ", ServiceControl");
 
             body = Encoding.UTF8.GetBytes(bodyString);
             // end hack
             var headers = new Dictionary<string, string>();
-            headers[Headers.EnclosedMessageTypes] = messageToSend.GetType().FullName;
+            headers[Headers.EnclosedMessageTypes] = result.GetType().FullName;
             headers[Headers.ContentType] = ContentTypes.Json; //Needed for ActiveMQ transport
             headers[Headers.ReplyToAddress] = settings.LocalAddress();
 
@@ -84,7 +87,7 @@
             }
         }
 
-        public Task Send(object messageToSend)
+        public Task Send(ReportCustomCheckResult messageToSend)
         {
             return Send(messageToSend, TimeSpan.MaxValue);
         }
