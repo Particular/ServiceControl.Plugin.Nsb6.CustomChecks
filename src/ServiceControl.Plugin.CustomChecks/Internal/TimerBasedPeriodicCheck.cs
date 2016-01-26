@@ -9,10 +9,10 @@ namespace ServiceControl.Plugin.CustomChecks.Internal
     {
         static ILog Logger = LogManager.GetLogger(typeof(TimerBasedPeriodicCheck));
 
-        public TimerBasedPeriodicCheck(IPeriodicCheck periodicCheck, ServiceControlBackend serviceControlBacked)
+        public TimerBasedPeriodicCheck(IPeriodicCheck periodicCheck, ServiceControlBackend serviceControlBackend)
         {
             this.periodicCheck = periodicCheck;
-            this.serviceControlBackend = serviceControlBacked;
+            this.serviceControlBackend = serviceControlBackend;
         }
 
         public void Start()

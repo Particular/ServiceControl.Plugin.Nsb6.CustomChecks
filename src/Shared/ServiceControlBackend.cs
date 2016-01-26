@@ -30,7 +30,6 @@
             serializer = new JsonMessageSerializer(new SimpleMessageMapper());
 
             serviceControlBackendAddress = GetServiceControlAddress();
-            VerifyIfServiceControlQueueExists().GetAwaiter().GetResult();
 
             circuitBreaker =
                 new RepeatedFailuresOverTimeCircuitBreaker("ServiceControlConnectivity", TimeSpan.FromMinutes(2),
@@ -148,7 +147,7 @@
             return false;
         }
 
-        async Task VerifyIfServiceControlQueueExists()
+        public async Task VerifyIfServiceControlQueueExists()
         {
             try
             {

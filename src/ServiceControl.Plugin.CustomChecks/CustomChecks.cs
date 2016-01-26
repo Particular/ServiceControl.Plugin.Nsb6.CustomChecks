@@ -35,21 +35,25 @@
             // ReSharper restore NotAccessedField.Local
             List<TimerBasedPeriodicCheck> timerPeriodicChecks;
 
-            protected override Task OnStart(IBusSession session)
+            protected override async Task OnStart(IBusSession session)
             {
                 var periodicChecks = Builder.BuildAll<IPeriodicCheck>().ToList();
                 timerPeriodicChecks = new List<TimerBasedPeriodicCheck>(periodicChecks.Count);
 
+                // TODO: Should we start them concurrently?
                 foreach (var check in periodicChecks)
                 {
-                    var timerBasedPeriodicCheck = new TimerBasedPeriodicCheck(check, new ServiceControlBackend(Dispatcher, Settings, CriticalError));
+                    var serviceControlBackend = new ServiceControlBackend(Dispatcher, Settings, CriticalError);
+                    await serviceControlBackend.VerifyIfServiceControlQueueExists().ConfigureAwait(false);
+
+                    var timerBasedPeriodicCheck = new TimerBasedPeriodicCheck(check, serviceControlBackend);
                     timerBasedPeriodicCheck.Start();
 
                     timerPeriodicChecks.Add(timerBasedPeriodicCheck);
                 }
 
                 customChecks = Builder.BuildAll<ICustomCheck>().ToList();
-                return Task.WhenAll(customChecks.Select(c => c.PerformCheck()));
+                await Task.WhenAll(customChecks.Select(c => c.PerformCheck())).ConfigureAwait(false);
             }
 
             protected override Task OnStop(IBusSession session)

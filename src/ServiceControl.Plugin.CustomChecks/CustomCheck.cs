@@ -36,12 +36,13 @@
             return ReportToBackend(CheckResult.Failed(failureReason));
         }
 
-        Task ReportToBackend(CheckResult result)
+        async Task ReportToBackend(CheckResult result)
         {
             var dispatcher = Builder.Build<IDispatchMessages>();
 
             var serviceControlBackend = new ServiceControlBackend(dispatcher, Settings, CriticalError);
-            return serviceControlBackend.Send(new ReportCustomCheckResult(this, result));
+            await serviceControlBackend.VerifyIfServiceControlQueueExists().ConfigureAwait(false);
+            await serviceControlBackend.Send(new ReportCustomCheckResult(this, result)).ConfigureAwait(false);
         }
     }
 }
