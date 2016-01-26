@@ -2,17 +2,17 @@
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Internal;
     using NServiceBus;
     using Messages;
     using NServiceBus.ObjectBuilder;
+    using NServiceBus.Settings;
     using NServiceBus.Transports;
-    using NServiceBus.Unicast;
 
     public abstract class CustomCheck : ICustomCheck
     {
-        public Configure Configure { get; set; }
-        public UnicastBus UnicastBus { get; set; }
+        public ReadOnlySettings Settings { get; set; }
         public CriticalError CriticalError { get; set; }
 
         Timer delayExecutionPassTimer;
@@ -38,10 +38,7 @@
         {
             if (Builder != null)
             {
-                if (delayExecutionPassTimer != null)
-                {
-                    delayExecutionPassTimer.Dispose();
-                }
+                delayExecutionPassTimer?.Dispose();
                 ReportToBackend(CheckResult.Pass);
             }
             else
@@ -61,10 +58,7 @@
         {
             if (Builder != null)
             {
-                if (delayExecutionFailTimer != null)
-                {
-                    delayExecutionFailTimer.Dispose();
-                }
+                delayExecutionFailTimer?.Dispose();
                 ReportToBackend(CheckResult.Failed((string)state));
             }
             else
@@ -87,16 +81,16 @@
 
         public string Id { get; private set; }
 
-        void ReportToBackend(CheckResult result)
+        Task ReportToBackend(CheckResult result)
         {
-            var sender = Builder.Build<ISendMessages>();
+            var dispatcher = Builder.Build<IDispatchMessages>();
 
-            var serviceControlBackend = new ServiceControlBackend(sender, Configure, CriticalError);
-            serviceControlBackend.Send(new ReportCustomCheckResult
+            var serviceControlBackend = new ServiceControlBackend(dispatcher, Settings, CriticalError);
+            return serviceControlBackend.Send(new ReportCustomCheckResult
             {
-                HostId = UnicastBus.HostInformation.HostId,
-                Host = UnicastBus.HostInformation.DisplayName,
-                EndpointName = Configure.Settings.EndpointName(),
+                HostId = Settings.Get<Guid>("NServiceBus.HostInformation.HostId"),
+                Host = Settings.Get<string>("NServiceBus.HostInformation.DisplayName"),
+                EndpointName = Settings.EndpointName().ToString(),
                 CustomCheckId = Id,
                 Category = Category,
                 HasFailed = result.HasFailed,
