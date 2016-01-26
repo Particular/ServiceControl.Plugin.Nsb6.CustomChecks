@@ -5,8 +5,8 @@
     using System.Threading.Tasks;
     using NServiceBus;
     using NServiceBus.ObjectBuilder;
+    using NServiceBus.Settings;
     using NServiceBus.Transports;
-    using NServiceBus.Unicast;
 
     /// <summary>
     ///     This class will upon startup get the registered PeriodicCheck types
@@ -14,34 +14,33 @@
     /// </summary>
     class PeriodicCheckMonitor : IWantToRunWhenBusStartsAndStops
     {
-        public UnicastBus UnicastBus { get; set; }
-        public ISendMessages MessageSender { get; set; }
+        public IDispatchMessages Dispatcher { get; set; }
+        public ReadOnlySettings Settings { get; set; }
         public IBuilder Builder { get; set; }
 
-        public Configure Configure { get; set; }
         public CriticalError CriticalError { get; set; }
 
-        public void Start()
+// ReSharper disable NotAccessedField.Local
+        List<ICustomCheck> customChecks;
+// ReSharper restore NotAccessedField.Local
+        List<TimerBasedPeriodicCheck> timerPeriodicChecks;
+        public Task Start(IBusSession session)
         {
             var periodicChecks = Builder.BuildAll<IPeriodicCheck>().ToList();
             timerPeriodicChecks = new List<TimerBasedPeriodicCheck>(periodicChecks.Count);
 
             foreach (var check in periodicChecks)
             {
-                timerPeriodicChecks.Add(new TimerBasedPeriodicCheck(check, MessageSender, Configure, UnicastBus, CriticalError));
+                timerPeriodicChecks.Add(new TimerBasedPeriodicCheck(check, Dispatcher, Settings, CriticalError));
             }
 
             customChecks = Builder.BuildAll<ICustomCheck>().ToList();
+            return Task.FromResult(0);
         }
 
-        public void Stop()
+        public Task Stop(IBusSession session)
         {
-            Parallel.ForEach(timerPeriodicChecks, t => t.Dispose());
+            return Task.WhenAll(timerPeriodicChecks.Select(t => t.Stop()).ToArray());
         }
-
-// ReSharper disable NotAccessedField.Local
-        List<ICustomCheck> customChecks;
-// ReSharper restore NotAccessedField.Local
-        List<TimerBasedPeriodicCheck> timerPeriodicChecks;
     }
 }

@@ -1,25 +1,31 @@
 ﻿namespace ServiceControl.Plugin
 {
     using System;
+    using System.Collections.Generic;
     using System.Configuration;
     using System.IO;
+    using System.Linq;
     using System.Text;
+    using System.Threading.Tasks;
     using NServiceBus;
     using NServiceBus.Config;
-    using NServiceBus.Serializers.Binary;
     using NServiceBus.Serializers.Json;
     using NServiceBus.Transports;
     using NServiceBus.Unicast;
     using NServiceBus.Unicast.Transport;
-    using NServiceBus.CircuitBreakers;
+    using NServiceBus.Extensibility;
+    using NServiceBus.Performance.TimeToBeReceived;
+    using NServiceBus.Routing;
+    using NServiceBus.Settings;
+    using ServiceControl.Plugin.CustomChecks.Internal;
 
     class ServiceControlBackend
     {
-        Configure configure;
+        ReadOnlySettings settings;
         CriticalError criticalError;
-        public  ServiceControlBackend(ISendMessages messageSender, Configure configure, CriticalError criticalError)
+        public  ServiceControlBackend(IDispatchMessages messageSender, ReadOnlySettings settings, CriticalError criticalError)
         {
-            this.configure = configure;
+            this.settings = settings;
             this.criticalError = criticalError;
             this.messageSender = messageSender;
             serializer = new JsonMessageSerializer(new SimpleMessageMapper());
@@ -37,65 +43,76 @@
                                    "\r\n", ex));
         }
 
-        public void Send(object messageToSend, TimeSpan timeToBeReceived)
+        public async Task Send(object messageToSend, TimeSpan timeToBeReceived)
         {
-            var message = new TransportMessage
-            {
-                TimeToBeReceived = timeToBeReceived
-            };
-
+            byte[] body;
             using (var stream = new MemoryStream())
             {
                 serializer.Serialize(new[] { messageToSend }, stream);
-                message.Body = stream.ToArray();
+                body = stream.ToArray();
             }
 
             //hack to remove the type info from the json
-            var bodyString = Encoding.UTF8.GetString(message.Body);
+            var bodyString = Encoding.UTF8.GetString(body);
 
             var toReplace = ", " + messageToSend.GetType().Assembly.GetName().Name;
 
             bodyString = bodyString.Replace(toReplace, ", ServiceControl");
 
-            message.Body = Encoding.UTF8.GetBytes(bodyString);
+            body = Encoding.UTF8.GetBytes(bodyString);
             // end hack
-            message.Headers[Headers.EnclosedMessageTypes] = messageToSend.GetType().FullName;
-            message.Headers[Headers.ContentType] = ContentTypes.Json; //Needed for ActiveMQ transport
+            var headers = new Dictionary<string, string>();
+            headers[Headers.EnclosedMessageTypes] = messageToSend.GetType().FullName;
+            headers[Headers.ContentType] = ContentTypes.Json; //Needed for ActiveMQ transport
+            headers[Headers.ReplyToAddress] = settings.LocalAddress();
 
             try
             {
-                messageSender.Send(message, new SendOptions(serviceControlBackendAddress) { ReplyToAddress = configure.LocalAddress });
+                var outgoingMessage = new OutgoingMessage(Guid.NewGuid().ToString(), headers, body);
+                DiscardIfNotReceivedBefore[] constraints = { new DiscardIfNotReceivedBefore(timeToBeReceived) };
+                var address = new UnicastAddressTag(serviceControlBackendAddress);
+                var transportOperation = new TransportOperation(outgoingMessage, address, DispatchConsistency.Default, constraints);
+                var unicastTransportOperation = new UnicastTransportOperation(outgoingMessage, address);
+                IEnumerable<MulticastTransportOperation> multicastOperations = Enumerable.Empty<MulticastTransportOperation>();
+                UnicastTransportOperation[] unicastOperations =
+                {
+    unicastTransportOperation
+};
+                TransportOperations operations = new TransportOperations(multicastOperations, unicastOperations);
+
+                await messageSender.Dispatch(operations, new ContextBag()).ConfigureAwait(false);
                 circuitBreaker.Success();
             }
             catch (Exception ex)
             {
-                circuitBreaker.Failure(ex);
+                await circuitBreaker.Failure(ex).ConfigureAwait(false);
             }            
         }
 
-        public void Send(object messageToSend)
+        public Task Send(object messageToSend)
         {
-            Send(messageToSend, TimeSpan.MaxValue);
+            return Send(messageToSend, TimeSpan.MaxValue);
         }
 
-        Address GetServiceControlAddress()
+        string GetServiceControlAddress()
         {
             var queueName = ConfigurationManager.AppSettings[@"ServiceControl/Queue"];
-            if (!String.IsNullOrEmpty(queueName))
+            if (!string.IsNullOrEmpty(queueName))
             {
-                return Address.Parse(queueName);
+                return queueName;
             }
 
-            Address errorAddress;
+            string errorAddress;
             if (TryGetErrorQueueAddress(out errorAddress))
             { 
+
                 return new Address("Particular.ServiceControl", errorAddress.Machine);
             }
 
             if (VersionChecker.CoreVersionIsAtLeast(4, 1))
             {
                 //audit config was added in 4.1
-                Address address;
+                string address;
                 if (TryGetAuditAddress(out address))
                 {
                     return new Address("Particular.ServiceControl", address.Machine);
@@ -106,24 +123,24 @@
         }
 
 
-        bool TryGetErrorQueueAddress(out Address address)
+        bool TryGetErrorQueueAddress(out string address)
         {
-            var faultsForwarderConfig = configure.Settings.GetConfigSection<MessageForwardingInCaseOfFaultConfig>();
+            var faultsForwarderConfig = settings.GetConfigSection<MessageForwardingInCaseOfFaultConfig>();
             if (faultsForwarderConfig != null && !string.IsNullOrEmpty(faultsForwarderConfig.ErrorQueue))
             {
-                address = Address.Parse(faultsForwarderConfig.ErrorQueue);
+                address = faultsForwarderConfig.ErrorQueue;
                 return true;
             }
             address = null;
             return false;
         }
 
-        bool TryGetAuditAddress(out Address address)
+        bool TryGetAuditAddress(out string address)
         {
-            var auditConfig = configure.Settings.GetConfigSection<AuditConfig>();
+            var auditConfig = settings.GetConfigSection<AuditConfig>();
             if (auditConfig != null && !string.IsNullOrEmpty(auditConfig.QueueName))
             {
-                address = Address.Parse(auditConfig.QueueName);
+                address = auditConfig.QueueName;
                 return true;
             }
             address = null;
@@ -139,7 +156,9 @@
                 // If we are unable to send a message because the queue doesn't exist, then we can fail fast.
                 // We currently don't have a way to check if Queue exists in a transport agnostic way, 
                 // hence the send.
-                messageSender.Send(ControlMessage.Create(), new SendOptions(serviceControlBackendAddress) { ReplyToAddress = configure.LocalAddress });
+                new UnicastTransportOperation(new OutgoingMessage(), )
+                messageSender.Dispatch(new TransportOperations(Enumerable.Empty<MulticastTransportOperation>(), ), )
+                messageSender.Send(ControlMessageFactory.Create(MessageIntentEnum.Send), new SendOptions(serviceControlBackendAddress) { ReplyToAddress = settings.LocalAddress });
             }
             catch (Exception ex)
             {
@@ -152,8 +171,8 @@
         }
 
         JsonMessageSerializer serializer;
-        ISendMessages messageSender;
-        Address serviceControlBackendAddress;
+        IDispatchMessages messageSender;
+        string serviceControlBackendAddress;
         RepeatedFailuresOverTimeCircuitBreaker circuitBreaker;
     }
 }

@@ -1,53 +1,33 @@
 namespace ServiceControl.Plugin.CustomChecks.Internal
 {
     using System;
-    using System.Threading;
-    using Messages;
+    using System.Threading.Tasks;
     using NServiceBus;
     using NServiceBus.Logging;
+    using NServiceBus.Settings;
     using NServiceBus.Transports;
-    using NServiceBus.Unicast;
+    using ServiceControl.Plugin.CustomChecks.Messages;
 
-    public class TimerBasedPeriodicCheck : IDisposable
+    public class TimerBasedPeriodicCheck
     {
-        public TimerBasedPeriodicCheck(IPeriodicCheck periodicCheck, ISendMessages messageSender, Configure configure, UnicastBus unicastBus, CriticalError criticalError)
-        {
+        static ILog Logger = LogManager.GetLogger(typeof(TimerBasedPeriodicCheck));
 
+        public TimerBasedPeriodicCheck(IPeriodicCheck periodicCheck, IDispatchMessages messageSender, ReadOnlySettings settings, CriticalError criticalError)
+        {
             this.periodicCheck = periodicCheck;
-            this.configure = configure;
-            this.unicastBus = unicastBus;
-            serviceControlBackend = new ServiceControlBackend(messageSender, configure, criticalError);
+            this.settings = settings;
+            serviceControlBackend = new ServiceControlBackend(messageSender, settings, criticalError);
 
-            timer = new Timer(Run, null, TimeSpan.Zero, periodicCheck.Interval);
+            timer = new AsyncTimer();
+            timer.Start(Run, periodicCheck.Interval, e => { /* should not happen */});
         }
 
-        public void Dispose()
+        public Task Stop()
         {
-            using (var waitHandle = new ManualResetEvent(false))
-            {
-                timer.Dispose(waitHandle);
-
-                waitHandle.WaitOne();
-            }
+            return timer.Stop();
         }
 
-        void ReportToBackend(CheckResult result, string customCheckId, string category, TimeSpan ttr)
-        {
-            var reportCustomCheckResult = new ReportCustomCheckResult
-            {
-                HostId = unicastBus.HostInformation.HostId,
-                Host = unicastBus.HostInformation.DisplayName,
-                EndpointName = configure.Settings.EndpointName(),
-                CustomCheckId = customCheckId,
-                Category = category,
-                HasFailed = result.HasFailed,
-                FailureReason = result.FailureReason,
-                ReportedAt = DateTime.UtcNow
-            };
-            serviceControlBackend.Send(reportCustomCheckResult, ttr);
-        }
-
-        void Run(object state)
+        async Task Run()
         {
             CheckResult result;
             try
@@ -56,15 +36,14 @@ namespace ServiceControl.Plugin.CustomChecks.Internal
             }
             catch (Exception ex)
             {
-                var reason = String.Format("'{0}' implementation failed to run.", periodicCheck.GetType());
+                var reason = string.Format("'{0}' implementation failed to run.", periodicCheck.GetType());
                 result = CheckResult.Failed(reason);
                 Logger.Error(reason, ex);
             }
 
             try
             {
-                ReportToBackend(result, periodicCheck.Id, periodicCheck.Category,
-                    TimeSpan.FromTicks(periodicCheck.Interval.Ticks*4));
+                await ReportToBackend(result, periodicCheck.Id, periodicCheck.Category, TimeSpan.FromTicks(periodicCheck.Interval.Ticks*4)).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -72,11 +51,26 @@ namespace ServiceControl.Plugin.CustomChecks.Internal
             }
         }
 
-        static ILog Logger = LogManager.GetLogger(typeof(TimerBasedPeriodicCheck));
+        Task ReportToBackend(CheckResult result, string customCheckId, string category, TimeSpan ttr)
+        {
+            var reportCustomCheckResult = new ReportCustomCheckResult
+            {
+                HostId = settings.Get<Guid>("NServiceBus.HostInformation.HostId"),
+                Host = settings.Get<string>("NServiceBus.HostInformation.DisplayName"),
+                EndpointName = settings.EndpointName().ToString(),
+                CustomCheckId = customCheckId,
+                Category = category,
+                HasFailed = result.HasFailed,
+                FailureReason = result.FailureReason,
+                ReportedAt = DateTime.UtcNow
+            };
+
+            return serviceControlBackend.Send(reportCustomCheckResult, ttr);
+        }
+
         IPeriodicCheck periodicCheck;
         ServiceControlBackend serviceControlBackend;
-        Timer timer;
-        UnicastBus unicastBus;
-        Configure configure;
+        ReadOnlySettings settings;
+        AsyncTimer timer;
     }
 }
