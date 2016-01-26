@@ -5,6 +5,7 @@
     using System.Configuration;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Text;
     using System.Threading.Tasks;
     using NServiceBus;
@@ -13,6 +14,7 @@
     using NServiceBus.Performance.TimeToBeReceived;
     using NServiceBus.Serializers.Json;
     using NServiceBus.Settings;
+    using NServiceBus.Support;
     using NServiceBus.Transports;
     using NServiceBus.Unicast.Transport;
     using ServiceControl.Plugin.CustomChecks.Internal;
@@ -95,10 +97,12 @@
                 return queueName;
             }
 
+            // TODO: Is this right??
             string errorAddress;
             if (TryGetErrorQueueAddress(out errorAddress))
             {
-                return new Address("Particular.ServiceControl", errorAddress.Machine);
+                var qm = Parse(errorAddress);
+                return "Particular.ServiceControl"+ "@" + qm.Item2;
             }
 
             if (VersionChecker.CoreVersionIsAtLeast(4, 1))
@@ -107,7 +111,8 @@
                 string address;
                 if (TryGetAuditAddress(out address))
                 {
-                    return new Address("Particular.ServiceControl", address.Machine);
+                    var qm = Parse(errorAddress);
+                    return "Particular.ServiceControl" + "@" + qm.Item2;
                 }
             }
 
@@ -164,6 +169,30 @@
                                       "\r\n Additional details: {0}";
                 criticalError.Raise(errMsg, ex);
             }
+        }
+
+        static Tuple<string, string> Parse(string destination)
+        {
+            if (string.IsNullOrEmpty(destination))
+            {
+                throw new ArgumentException("Invalid destination address specified", nameof(destination));
+            }
+
+            var arr = destination.Split('@');
+
+            var queue = arr[0];
+            var machine = RuntimeEnvironment.MachineName;
+
+            if (string.IsNullOrWhiteSpace(queue))
+            {
+                throw new ArgumentException("Invalid destination address specified", nameof(destination));
+            }
+
+            if (arr.Length == 2)
+                if (arr[1] != "." && arr[1].ToLower() != "localhost" && arr[1] != IPAddress.Loopback.ToString())
+                    machine = arr[1];
+
+            return new Tuple<string, string>(queue, machine);
         }
 
         RepeatedFailuresOverTimeCircuitBreaker circuitBreaker;
