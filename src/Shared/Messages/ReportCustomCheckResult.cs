@@ -16,13 +16,13 @@
             ReportedAt = DateTime.UtcNow;
         }
 
+        public Guid HostId { get; private set; }
         public string CustomCheckId { get; }
         public string Category { get; }
         public bool HasFailed { get; }
         public string FailureReason { get; }
-        public DateTime ReportedAt { get; }
 
-        public Guid HostId { get; private set; }
+        public DateTime ReportedAt { get; }
         public string EndpointName { get; private set; }
         public string Host { get; private set; }
 

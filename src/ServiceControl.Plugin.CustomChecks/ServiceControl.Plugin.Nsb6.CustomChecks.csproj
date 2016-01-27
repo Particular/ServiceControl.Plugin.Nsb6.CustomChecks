@@ -68,7 +68,6 @@
     <Compile Include="CheckResult.cs" />
     <Compile Include="CustomChecks.cs" />
     <Compile Include="Internal\AsyncTimer.cs" />
-    <Compile Include="Internal\CustomChecksFeature.cs" />
     <Compile Include="Internal\ICheck.cs" />
     <Compile Include="Internal\RepeatedFailuresOverTimeCircuitBreaker.cs" />
     <Compile Include="Internal\TimerBasedPeriodicCheck.cs" />

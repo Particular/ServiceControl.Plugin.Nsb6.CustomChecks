@@ -48,7 +48,8 @@
             byte[] body;
             using (var stream = new MemoryStream())
             {
-                serializer.Serialize(new[] { result }, stream);
+                var resultAsObject = (object) result; // This is needed in order to force Json to anotate the payload with the $type information
+                serializer.Serialize(new[] { resultAsObject }, stream);
                 body = stream.ToArray();
             }
 
@@ -65,6 +66,7 @@
             headers[Headers.EnclosedMessageTypes] = result.GetType().FullName;
             headers[Headers.ContentType] = ContentTypes.Json; //Needed for ActiveMQ transport
             headers[Headers.ReplyToAddress] = settings.LocalAddress();
+            headers[Headers.MessageIntent] = MessageIntentEnum.Send.ToString();
 
             try
             {
