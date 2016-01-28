@@ -10,9 +10,9 @@
         {
         }
 
-        public override Task PerformCheck()
+        public override Task<CheckResult> PerformCheck()
         {
-            return ReportPass();
+            return CheckResult.Pass;
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace ServiceControl.Plugin.CustomChecks.Internal
+namespace ServiceControl.Plugin.CustomChecks
 {
     using System;
     using System.Threading;
@@ -6,7 +6,7 @@ namespace ServiceControl.Plugin.CustomChecks.Internal
 
     class AsyncTimer
     {
-        public void Start(Func<Task> callback, TimeSpan interval, Action<Exception> errorCallback)
+        public void Start(Func<Task> callback, TimeSpan? interval, Action<Exception> errorCallback)
         {
             tokenSource = new CancellationTokenSource();
             var token = tokenSource.Token;
@@ -17,7 +17,15 @@ namespace ServiceControl.Plugin.CustomChecks.Internal
                 {
                     try
                     {
-                        await Task.Delay(interval, token).ConfigureAwait(false);
+                        if (interval.HasValue)
+                        {
+                            await Task.Delay(interval.Value, token).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            tokenSource.Cancel();
+                        }
+
                         await callback().ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)

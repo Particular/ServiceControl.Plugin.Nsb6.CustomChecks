@@ -17,7 +17,7 @@
     using NServiceBus.Support;
     using NServiceBus.Transports;
     using NServiceBus.Unicast.Transport;
-    using ServiceControl.Plugin.CustomChecks.Internal;
+    using ServiceControl.Plugin.CustomChecks;
     using ServiceControl.Plugin.CustomChecks.Messages;
 
     class ServiceControlBackend
@@ -101,7 +101,6 @@
                 return queueName;
             }
 
-            // TODO: Is this right??
             string errorAddress;
             if (TryGetErrorQueueAddress(out errorAddress))
             {

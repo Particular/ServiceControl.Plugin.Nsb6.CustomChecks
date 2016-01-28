@@ -1,4 +1,4 @@
-namespace ServiceControl.Plugin.CustomChecks.Internal
+namespace ServiceControl.Plugin.CustomChecks
 {
     using System;
     using System.Threading;

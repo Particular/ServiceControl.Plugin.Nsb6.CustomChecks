@@ -6,7 +6,7 @@
     using NServiceBus;
     using CustomChecks;
 
-    class InteractiveCustomCheck : PeriodicCheck
+    class InteractiveCustomCheck : CustomCheck
     {
         public InteractiveCustomCheck()
             : base("InteractiveCustomCheck", "CustomCheck",TimeSpan.FromSeconds(5))

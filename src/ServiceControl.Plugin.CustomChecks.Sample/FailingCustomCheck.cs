@@ -10,9 +10,9 @@
         {
         }
 
-        public override Task PerformCheck()
+        public override Task<CheckResult> PerformCheck()
         {
-            return ReportFailed("Some reason");
+            return CheckResult.Failed("Some reason");
         }
     }
 }

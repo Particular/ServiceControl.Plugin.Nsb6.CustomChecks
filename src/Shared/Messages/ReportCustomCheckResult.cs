@@ -3,14 +3,13 @@
     using System;
     using NServiceBus;
     using NServiceBus.Settings;
-    using Internal;
 
     class ReportCustomCheckResult
     {
-        public ReportCustomCheckResult(ICheck check, CheckResult result)
+        public ReportCustomCheckResult(string customCheckId, string category, CheckResult result)
         {
-            CustomCheckId = check.Id;
-            Category = check.Category;
+            CustomCheckId = customCheckId;
+            Category = category;
             HasFailed = result.HasFailed;
             FailureReason = result.FailureReason;
             ReportedAt = DateTime.UtcNow;

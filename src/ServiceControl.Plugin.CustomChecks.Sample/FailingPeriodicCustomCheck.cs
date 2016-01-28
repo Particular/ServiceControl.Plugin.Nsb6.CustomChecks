@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using CustomChecks;
 
-    class FailingPeriodicCustomCheck : PeriodicCheck
+    class FailingPeriodicCustomCheck : CustomCheck
     {
         public FailingPeriodicCustomCheck(): base("FailingPeriodicCustomCheck", "PeriodicChecks", TimeSpan.FromSeconds(30))
         {
@@ -16,7 +16,7 @@
         }
     }
 
-    class SuccessfulPeriodicCustomCheck : PeriodicCheck
+    class SuccessfulPeriodicCustomCheck : CustomCheck
     {
         public SuccessfulPeriodicCustomCheck()
             : base("SuccessfulPeriodicCustomCheck", "PeriodicChecks", TimeSpan.FromSeconds(30))
