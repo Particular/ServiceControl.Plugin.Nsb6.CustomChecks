@@ -43,6 +43,7 @@ namespace ServiceControl.Plugin.CustomChecks
         public Task Stop()
         {
             tokenSource.Cancel();
+            tokenSource.Dispose();
             return task;
         }
 
