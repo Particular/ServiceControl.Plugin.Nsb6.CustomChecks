@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Configuration;
     using System.IO;
-    using System.Linq;
     using System.Net;
     using System.Text;
     using System.Threading.Tasks;
@@ -12,6 +11,7 @@
     using NServiceBus.Config;
     using NServiceBus.Extensibility;
     using NServiceBus.Performance.TimeToBeReceived;
+    using NServiceBus.Routing;
     using NServiceBus.Serializers.Json;
     using NServiceBus.Settings;
     using NServiceBus.Support;
@@ -71,15 +71,8 @@
             try
             {
                 var outgoingMessage = new OutgoingMessage(Guid.NewGuid().ToString(), headers, body);
-                DiscardIfNotReceivedBefore[] constraints =
-                {
-                    new DiscardIfNotReceivedBefore(timeToBeReceived)
-                };
-                var unicastTransportOperation = new UnicastTransportOperation(outgoingMessage, serviceControlBackendAddress, constraints);
-                var multicastOperations = Enumerable.Empty<MulticastTransportOperation>();
-                UnicastTransportOperation[] unicastOperations = { unicastTransportOperation };
-
-                await messageSender.Dispatch(new TransportOperations(multicastOperations, unicastOperations), new ContextBag()).ConfigureAwait(false);
+                var operation = new TransportOperation(outgoingMessage, new UnicastAddressTag(serviceControlBackendAddress), deliveryConstraints: new[] { new DiscardIfNotReceivedBefore(timeToBeReceived) });
+                await messageSender.Dispatch(new TransportOperations(operation), new ContextBag()).ConfigureAwait(false);
                 circuitBreaker.Success();
             }
             catch (Exception ex)
@@ -158,11 +151,8 @@
                 // hence the send.
                 var outgoingMessage = ControlMessageFactory.Create(MessageIntentEnum.Send);
                 outgoingMessage.Headers[Headers.ReplyToAddress] = settings.LocalAddress();
-                var operation = new UnicastTransportOperation(outgoingMessage, serviceControlBackendAddress);
-                await messageSender.Dispatch(new TransportOperations(Enumerable.Empty<MulticastTransportOperation>(), new[]
-                {
-                    operation
-                }), new ContextBag()).ConfigureAwait(false);
+                var operation = new TransportOperation(outgoingMessage, new UnicastAddressTag(serviceControlBackendAddress));
+                await messageSender.Dispatch(new TransportOperations(operation), new ContextBag()).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
