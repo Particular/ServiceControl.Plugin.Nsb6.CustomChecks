@@ -7,7 +7,7 @@
         public bool HasFailed { get; set; }
         public string FailureReason { get; set; }
 
-        public static CheckResult Pass => new CheckResult();
+        public static CheckResult Pass = new CheckResult();
 
         public static CheckResult Failed(string reason)
         {
