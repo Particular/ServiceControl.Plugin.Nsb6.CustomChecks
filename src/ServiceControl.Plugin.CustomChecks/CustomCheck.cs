@@ -3,7 +3,7 @@
     using System;
     using System.Threading.Tasks;
 
-    public abstract class CustomCheck : ICustomCheck
+    public abstract partial class CustomCheck : ICustomCheck
     {
         protected CustomCheck(string id, string category, TimeSpan? repeatAfter = null)
         {
