@@ -3,31 +3,48 @@
     using System;
     using System.Collections.Generic;
     using System.Configuration;
+    using System.Globalization;
     using System.IO;
     using System.Net;
+    using System.Runtime.Serialization.Formatters;
     using System.Text;
     using System.Threading.Tasks;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
     using NServiceBus;
     using NServiceBus.Config;
     using NServiceBus.Extensibility;
     using NServiceBus.Performance.TimeToBeReceived;
     using NServiceBus.Routing;
-    using NServiceBus.Serializers.Json;
     using NServiceBus.Settings;
     using NServiceBus.Support;
     using NServiceBus.Transports;
     using NServiceBus.Unicast.Transport;
     using ServiceControl.Plugin.CustomChecks;
     using ServiceControl.Plugin.CustomChecks.Messages;
+    using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
     class ServiceControlBackend
     {
+        static JsonSerializerSettings serializerSettings = new JsonSerializerSettings
+        {
+            TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple,
+            TypeNameHandling = TypeNameHandling.Auto,
+            Converters =
+            {
+                new IsoDateTimeConverter
+                {
+                    DateTimeStyles = DateTimeStyles.RoundtripKind
+                }
+            }
+        };
+
         public ServiceControlBackend(IDispatchMessages messageSender, ReadOnlySettings settings, CriticalError criticalError)
         {
             this.settings = settings;
             this.criticalError = criticalError;
             this.messageSender = messageSender;
-            serializer = new JsonMessageSerializer(new SimpleMessageMapper());
+            serializer = JsonSerializer.Create(serializerSettings);
 
             serviceControlBackendAddress = GetServiceControlAddress();
 
@@ -47,9 +64,11 @@
 
             byte[] body;
             using (var stream = new MemoryStream())
+            using (var sw = new StreamWriter(stream))
             {
-                var resultAsObject = (object) result; // This is needed in order to force Json to anotate the payload with the $type information
-                serializer.Serialize(new[] { resultAsObject }, stream);
+                var resultAsObject = (object) result;
+                serializer.Serialize(sw, new[] { resultAsObject });
+                sw.Close();
                 body = stream.ToArray();
             }
 
@@ -62,6 +81,7 @@
 
             body = Encoding.UTF8.GetBytes(bodyString);
             // end hack
+
             var headers = new Dictionary<string, string>();
             headers[Headers.EnclosedMessageTypes] = result.GetType().FullName;
             headers[Headers.ContentType] = ContentTypes.Json; //Needed for ActiveMQ transport
@@ -98,7 +118,7 @@
             if (TryGetErrorQueueAddress(out errorAddress))
             {
                 var qm = Parse(errorAddress);
-                return "Particular.ServiceControl"+ "@" + qm.Item2;
+                return "Particular.ServiceControl" + "@" + qm.Item2;
             }
 
             if (VersionChecker.CoreVersionIsAtLeast(4, 1))
@@ -192,7 +212,7 @@
         CriticalError criticalError;
         IDispatchMessages messageSender;
 
-        JsonMessageSerializer serializer;
+        JsonSerializer serializer;
         string serviceControlBackendAddress;
         ReadOnlySettings settings;
     }

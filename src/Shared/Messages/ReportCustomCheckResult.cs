@@ -16,12 +16,11 @@
         }
 
         public Guid HostId { get; private set; }
-        public string CustomCheckId { get; }
-        public string Category { get; }
-        public bool HasFailed { get; }
-        public string FailureReason { get; }
-
-        public DateTime ReportedAt { get; }
+        public string CustomCheckId { get; private set; }
+        public string Category { get; private set; }
+        public bool HasFailed { get; private set; }
+        public string FailureReason { get; private set; }
+        public DateTime ReportedAt { get; private set; }
         public string EndpointName { get; private set; }
         public string Host { get; private set; }
 
