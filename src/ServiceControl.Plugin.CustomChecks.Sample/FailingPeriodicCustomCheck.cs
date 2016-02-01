@@ -1,30 +1,29 @@
 ﻿namespace ServiceControl.Plugin.CustomChecks.Sample
 {
     using System;
+    using System.Threading.Tasks;
     using CustomChecks;
 
-    class FailingPeriodicCustomCheck : PeriodicCheck
+    class FailingPeriodicCustomCheck : CustomCheck
     {
         public FailingPeriodicCustomCheck(): base("FailingPeriodicCustomCheck", "PeriodicChecks", TimeSpan.FromSeconds(30))
         {
-          
         }
 
-        public override CheckResult PerformCheck()
+        public override Task<CheckResult> PerformCheck()
         {
             return CheckResult.Failed("Periodic check failed");
         }
     }
 
-    class SuccessfulPeriodicCustomCheck : PeriodicCheck
+    class SuccessfulPeriodicCustomCheck : CustomCheck
     {
         public SuccessfulPeriodicCustomCheck()
             : base("SuccessfulPeriodicCustomCheck", "PeriodicChecks", TimeSpan.FromSeconds(30))
         {
-
         }
 
-        public override CheckResult PerformCheck()
+        public override Task<CheckResult> PerformCheck()
         {
             return CheckResult.Pass;
         }

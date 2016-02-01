@@ -1,10 +1,12 @@
 ﻿namespace ServiceControl.Plugin.CustomChecks.Sample
 {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
     using NServiceBus;
     using CustomChecks;
 
-    class InteractiveCustomCheck : PeriodicCheck
+    class InteractiveCustomCheck : CustomCheck
     {
         public InteractiveCustomCheck()
             : base("InteractiveCustomCheck", "CustomCheck",TimeSpan.FromSeconds(5))
@@ -13,7 +15,8 @@
         }
 
         public static bool ShouldFail { get; set; }
-        public override CheckResult PerformCheck()
+
+        public override Task<CheckResult> PerformCheck()
         {
             return ShouldFail ? CheckResult.Failed("User asked me to fail") : CheckResult.Pass;
         }
@@ -21,21 +24,30 @@
 
     class CommandLineHook: IWantToRunWhenBusStartsAndStops
     {
-        public void Start()
+        private CancellationTokenSource tokenSource = new CancellationTokenSource();
+        private Task loopTask;
+
+        public Task Start(IBusSession session)
         {
-            while (true)
+            var token = tokenSource.Token;
+            loopTask = Task.Run(() =>
             {
-                Console.Out.WriteLine("Hit any key to toggle the interactive check (max delay == 5 s)");
+                while (!token.IsCancellationRequested)
+                {
+                    Console.Out.WriteLine("Hit any key to toggle the interactive check (max delay == 5 s)");
 
-                Console.ReadKey();
+                    Console.ReadKey();
 
-                InteractiveCustomCheck.ShouldFail =  !InteractiveCustomCheck.ShouldFail;
-            }
+                    InteractiveCustomCheck.ShouldFail = !InteractiveCustomCheck.ShouldFail;
+                }
+            }, CancellationToken.None);
+            return Task.FromResult(0);
         }
 
-        public void Stop()
+        public Task Stop(IBusSession session)
         {
-            
+            tokenSource.Cancel();
+            return loopTask;
         }
     }
 }

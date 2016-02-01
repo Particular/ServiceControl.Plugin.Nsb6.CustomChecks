@@ -1,5 +1,6 @@
 ﻿namespace ServiceControl.Plugin.CustomChecks.Sample
 {
+    using System.Threading.Tasks;
     using CustomChecks;
 
     class SuccessfullCustomCheck : CustomCheck
@@ -7,7 +8,11 @@
         public SuccessfullCustomCheck()
             : base("SuccessfullCustomCheck", "CustomCheck")
         {
-            ReportPass();
+        }
+
+        public override Task<CheckResult> PerformCheck()
+        {
+            return CheckResult.Pass;
         }
     }
 }
