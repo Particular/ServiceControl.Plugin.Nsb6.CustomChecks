@@ -1,17 +1,34 @@
 ﻿namespace ServiceControl.Plugin.CustomChecks.Messages
 {
     using System;
+    using NServiceBus;
+    using NServiceBus.Settings;
 
     class ReportCustomCheckResult
     {
-        public Guid HostId { get; set; }
-        public string CustomCheckId { get; set; }
-        public string Category { get; set; }
-        public bool HasFailed { get; set; }
-        public string FailureReason { get; set; }
+        public ReportCustomCheckResult(string customCheckId, string category, CheckResult result)
+        {
+            CustomCheckId = customCheckId;
+            Category = category;
+            HasFailed = result.HasFailed;
+            FailureReason = result.FailureReason;
+            ReportedAt = DateTime.UtcNow;
+        }
 
-        public DateTime ReportedAt { get; set; }
-        public string EndpointName { get; set; }
-        public string Host { get; set; }
+        public Guid HostId { get; private set; }
+        public string CustomCheckId { get; private set; }
+        public string Category { get; private set; }
+        public bool HasFailed { get; private set; }
+        public string FailureReason { get; private set; }
+        public DateTime ReportedAt { get; private set; }
+        public string EndpointName { get; private set; }
+        public string Host { get; private set; }
+
+        public void Apply(ReadOnlySettings settings)
+        {
+            HostId = settings.Get<Guid>("NServiceBus.HostInformation.HostId");
+            Host = settings.Get<string>("NServiceBus.HostInformation.DisplayName");
+            EndpointName = settings.EndpointName().ToString();
+        }
     }
 }

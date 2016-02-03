@@ -19,6 +19,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="..\..\src\ServiceControl.Plugin.CustomChecks\bin\Release\ServiceControl.Plugin.Nsb6.CustomChecks.*" target="lib\net45" />
+    <file src="..\..\src\ServiceControl.Plugin.CustomChecks\bin\Release\ServiceControl.Plugin.Nsb6.CustomChecks.*" target="lib\net452" />
   </files>
 </package>
