@@ -5,6 +5,8 @@
     using System.Configuration;
     using System.IO;
     using System.Net;
+    using System.Runtime.Serialization;
+    using System.Runtime.Serialization.Json;
     using System.Text;
     using System.Threading.Tasks;
     using NServiceBus;
@@ -12,7 +14,6 @@
     using NServiceBus.Extensibility;
     using NServiceBus.Performance.TimeToBeReceived;
     using NServiceBus.Routing;
-    using NServiceBus.Serializers.Json;
     using NServiceBus.Settings;
     using NServiceBus.Support;
     using NServiceBus.Transports;
@@ -27,7 +28,11 @@
             this.settings = settings;
             this.criticalError = criticalError;
             this.messageSender = messageSender;
-            serializer = new JsonMessageSerializer(new SimpleMessageMapper());
+            serializer = new DataContractJsonSerializer(typeof(ReportCustomCheckResult), new DataContractJsonSerializerSettings
+            {
+                DateTimeFormat = new DateTimeFormat("o"),
+                EmitTypeInformation = EmitTypeInformation.Always,
+            });
 
             serviceControlBackendAddress = GetServiceControlAddress();
 
@@ -48,17 +53,17 @@
             byte[] body;
             using (var stream = new MemoryStream())
             {
-                var resultAsObject = (object) result; // This is needed in order to force Json to anotate the payload with the $type information
-                serializer.Serialize(new[] { resultAsObject }, stream);
+                var resultAsObject = new object[] { result };
+                serializer.WriteObject(stream, resultAsObject);
                 body = stream.ToArray();
             }
 
             //hack to remove the type info from the json
             var bodyString = Encoding.UTF8.GetString(body);
 
-            var toReplace = ", " + result.GetType().Assembly.GetName().Name;
+            var toReplace = "\"__type\":\"ReportCustomCheckResult:#ServiceControl.Plugin.CustomChecks.Messages\"";
 
-            bodyString = bodyString.Replace(toReplace, ", ServiceControl");
+            bodyString = bodyString.Replace(toReplace, "\"$type\":\"ServiceControl.Plugin.CustomChecks.Messages.ReportCustomCheckResult, ServiceControl\"");
 
             body = Encoding.UTF8.GetBytes(bodyString);
             // end hack
@@ -192,7 +197,7 @@
         CriticalError criticalError;
         IDispatchMessages messageSender;
 
-        JsonMessageSerializer serializer;
+        DataContractJsonSerializer serializer;
         string serviceControlBackendAddress;
         ReadOnlySettings settings;
     }

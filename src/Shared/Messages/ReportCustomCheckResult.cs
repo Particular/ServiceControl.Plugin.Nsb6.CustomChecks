@@ -1,9 +1,11 @@
 ﻿namespace ServiceControl.Plugin.CustomChecks.Messages
 {
     using System;
+    using System.Runtime.Serialization;
     using NServiceBus;
     using NServiceBus.Settings;
 
+    [DataContract]
     class ReportCustomCheckResult
     {
         public ReportCustomCheckResult(string customCheckId, string category, CheckResult result)
@@ -15,14 +17,21 @@
             ReportedAt = DateTime.UtcNow;
         }
 
+        [DataMember]
         public Guid HostId { get; private set; }
-        public string CustomCheckId { get; }
-        public string Category { get; }
-        public bool HasFailed { get; }
-        public string FailureReason { get; }
-
-        public DateTime ReportedAt { get; }
+        [DataMember]
+        public string CustomCheckId { get; private set; }
+        [DataMember]
+        public string Category { get; private set; }
+        [DataMember]
+        public bool HasFailed { get; private set; }
+        [DataMember]
+        public string FailureReason { get; private set; }
+        [DataMember]
+        public DateTime ReportedAt { get; private set; }
+        [DataMember]
         public string EndpointName { get; private set; }
+        [DataMember]
         public string Host { get; private set; }
 
         public void Apply(ReadOnlySettings settings)
