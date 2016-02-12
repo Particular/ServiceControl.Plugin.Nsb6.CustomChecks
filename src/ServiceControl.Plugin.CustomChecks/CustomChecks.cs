@@ -22,7 +22,6 @@
                 .ToList()
                 .ForEach(t => context.Container.ConfigureComponent(t, DependencyLifecycle.InstancePerCall));
 
-            // TODO: Way to much builder access
             context.RegisterStartupTask(b => new CustomChecksStartup(b.BuildAll<ICustomCheck>(), context.Settings, b.Build<CriticalError>(), b.Build<IDispatchMessages>()));
         }
 
@@ -39,12 +38,11 @@
             protected override async Task OnStart(IBusSession session)
             {
                 timerPeriodicChecks = new List<TimerBasedPeriodicCheck>(customChecks.Count);
+                serviceControlBackend = new ServiceControlBackend(dispatchMessages, settings, criticalError);
+                await serviceControlBackend.VerifyIfServiceControlQueueExists().ConfigureAwait(false);
 
                 foreach (var check in customChecks)
                 {
-                    var serviceControlBackend = new ServiceControlBackend(dispatchMessages, settings, criticalError);
-                    await serviceControlBackend.VerifyIfServiceControlQueueExists().ConfigureAwait(false);
-
                     var timerBasedPeriodicCheck = new TimerBasedPeriodicCheck(check, serviceControlBackend);
                     timerBasedPeriodicCheck.Start();
 
@@ -62,6 +60,7 @@
             readonly IDispatchMessages dispatchMessages;
             readonly ReadOnlySettings settings;
             List<TimerBasedPeriodicCheck> timerPeriodicChecks;
+            ServiceControlBackend serviceControlBackend;
         }
     }
 }
