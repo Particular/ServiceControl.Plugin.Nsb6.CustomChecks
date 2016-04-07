@@ -10,9 +10,9 @@ using NServiceBus.Transports;
 
 public class ConfigureMsmqTransport : IConfigureTestExecution
 {
-    BusConfiguration busConfiguration;
+    EndpointConfiguration busConfiguration;
 
-    public Task Configure(BusConfiguration configuration, IDictionary<string, string> settings)
+    public Task Configure(EndpointConfiguration configuration, IDictionary<string, string> settings)
     {
         busConfiguration = configuration;
         configuration.UseTransport<MsmqTransport>().ConnectionString(settings["Transport.ConnectionString"]);

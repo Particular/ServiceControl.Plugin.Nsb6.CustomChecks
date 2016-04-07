@@ -19,7 +19,7 @@
             return dictionary[key];
         }
 
-        public static Task DefineTransport(this BusConfiguration config, IDictionary<string, string> settings, Type endpointBuilderType)
+        public static Task DefineTransport(this EndpointConfiguration config, IDictionary<string, string> settings, Type endpointBuilderType)
         {
             if (!settings.ContainsKey("Transport"))
             {
@@ -31,7 +31,7 @@
 
         }
 
-        public static Task DefinePersistence(this BusConfiguration config, IDictionary<string, string> settings)
+        public static Task DefinePersistence(this EndpointConfiguration config, IDictionary<string, string> settings)
         {
             if (!settings.ContainsKey("Persistence"))
             { 
@@ -47,7 +47,7 @@
             Persistence
         }
 
-        private static async Task ConfigureTestExecution(TestDependencyType type, BusConfiguration config, IDictionary<string,string> settings)
+        private static async Task ConfigureTestExecution(TestDependencyType type, EndpointConfiguration config, IDictionary<string,string> settings)
         {
             var dependencyTypeString = type.ToString();
 
@@ -86,7 +86,7 @@
             }
         }
 
-        public static void DefineBuilder(this BusConfiguration config, IDictionary<string, string> settings)
+        public static void DefineBuilder(this EndpointConfiguration config, IDictionary<string, string> settings)
         {
             if (!settings.ContainsKey("Builder"))
             {

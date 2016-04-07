@@ -28,7 +28,7 @@
             this.typesToInclude = typesToInclude;
         }
 
-        public async Task<BusConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointConfiguration endpointConfiguration, IConfigurationSource configSource, Action<BusConfiguration> configurationBuilderCustomization)
+        public async Task<EndpointConfiguration> GetConfiguration(RunDescriptor runDescriptor, EndpointConfiguration endpointConfiguration, IConfigurationSource configSource, Action<EndpointConfiguration> configurationBuilderCustomization)
         {
             var settings = runDescriptor.Settings;            
 
@@ -36,9 +36,7 @@
 
             typesToInclude.AddRange(types);
 
-            var builder = new BusConfiguration();
-
-            builder.EndpointName(endpointConfiguration.EndpointName);
+            var builder = new EndpointConfiguration(endpointConfiguration.EndpointName);
             builder.TypesToIncludeInScan(typesToInclude);
             builder.CustomConfigurationSource(configSource);
             builder.EnableInstallers();

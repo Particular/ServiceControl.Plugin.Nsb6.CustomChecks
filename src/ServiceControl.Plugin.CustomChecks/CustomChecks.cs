@@ -35,7 +35,7 @@
                 this.customChecks = customChecks.ToList();
             }
 
-            protected override async Task OnStart(IBusSession session)
+            protected override async Task OnStart(IMessageSession session)
             {
                 timerPeriodicChecks = new List<TimerBasedPeriodicCheck>(customChecks.Count);
                 serviceControlBackend = new ServiceControlBackend(dispatchMessages, settings, criticalError);
@@ -50,7 +50,7 @@
                 }
             }
 
-            protected override Task OnStop(IBusSession session)
+            protected override Task OnStop(IMessageSession session)
             {
                 return Task.WhenAll(timerPeriodicChecks.Select(t => t.Stop()).ToArray());
             }
