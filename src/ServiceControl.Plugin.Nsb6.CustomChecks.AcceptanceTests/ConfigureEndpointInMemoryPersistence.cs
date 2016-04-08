@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.AcceptanceTesting.Support;
 
-
-public class ConfigureInMemoryPersistence : IConfigureTestExecution
+public class ConfigureEndpointInMemoryPersistence : IConfigureEndpointTestExecution
 {
-    public Task Configure(EndpointConfiguration configuration, IDictionary<string, string> settings)
+    public Task Configure(string endpointName, EndpointConfiguration configuration, RunSettings settings)
     {
         configuration.UsePersistence<InMemoryPersistence>();
         return Task.FromResult(0);

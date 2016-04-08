@@ -58,10 +58,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigureInMemoryPersistence.cs" />
+    <Compile Include="ConfigureEndpointInMemoryPersistence.cs" />
+    <Compile Include="ConfigureEndpointMsmqTransport.cs" />
+    <Compile Include="EndpointTemplates\EndpointCustomizationConfigurationExtensions.cs" />
     <Compile Include="ReportCustomCheckResult.cs" />
+    <Compile Include="ScenarioDescriptors\EnvironmentHelper.cs" />
     <Compile Include="When_registering_custom_check_which_fails.cs" />
-    <Compile Include="ConfigureMsmqTransport.cs" />
     <Compile Include="EndpointTemplates\ConfigureExtensions.cs" />
     <Compile Include="EndpointTemplates\DefaultServer.cs" />
     <Compile Include="NServiceBusAcceptanceTest.cs" />
