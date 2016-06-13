@@ -10,7 +10,6 @@
     using System.Text;
     using System.Threading.Tasks;
     using NServiceBus;
-    using NServiceBus.Config;
     using NServiceBus.Extensibility;
     using NServiceBus.Performance.TimeToBeReceived;
     using NServiceBus.Routing;
@@ -106,15 +105,11 @@
                 return "Particular.ServiceControl"+ "@" + qm.Item2;
             }
 
-            if (VersionChecker.CoreVersionIsAtLeast(4, 1))
+            string auditAddress;
+            if (TryGetAuditAddress(out auditAddress))
             {
-                //audit config was added in 4.1
-                string address;
-                if (TryGetAuditAddress(out address))
-                {
-                    var qm = Parse(errorAddress);
-                    return "Particular.ServiceControl" + "@" + qm.Item2;
-                }
+                var qm = Parse(auditAddress);
+                return "Particular.ServiceControl" + "@" + qm.Item2;
             }
 
             return null;
@@ -123,24 +118,17 @@
 
         bool TryGetErrorQueueAddress(out string address)
         {
-            var faultsForwarderConfig = settings.GetConfigSection<MessageForwardingInCaseOfFaultConfig>();
-            if (!string.IsNullOrEmpty(faultsForwarderConfig?.ErrorQueue))
-            {
-                address = faultsForwarderConfig.ErrorQueue;
-                return true;
-            }
-            address = null;
-            return false;
+            address = settings.ErrorQueueAddress();
+            return !string.IsNullOrWhiteSpace(address);
         }
 
         bool TryGetAuditAddress(out string address)
         {
-            var auditConfig = settings.GetConfigSection<AuditConfig>();
-            if (!string.IsNullOrEmpty(auditConfig?.QueueName))
+            if (settings.TryGetAuditQueueAddress(out address))
             {
-                address = auditConfig.QueueName;
                 return true;
             }
+
             address = null;
 
             return false;
