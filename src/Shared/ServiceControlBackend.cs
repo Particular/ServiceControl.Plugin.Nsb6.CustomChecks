@@ -10,13 +10,13 @@
     using System.Text;
     using System.Threading.Tasks;
     using NServiceBus;
-    using NServiceBus.Config;
+    using NServiceBus.DeliveryConstraints;
     using NServiceBus.Extensibility;
     using NServiceBus.Performance.TimeToBeReceived;
     using NServiceBus.Routing;
     using NServiceBus.Settings;
     using NServiceBus.Support;
-    using NServiceBus.Transports;
+    using NServiceBus.Transport;
     using NServiceBus.Unicast.Transport;
     using ServiceControl.Plugin.CustomChecks;
     using ServiceControl.Plugin.CustomChecks.Messages;
@@ -76,8 +76,8 @@
             try
             {
                 var outgoingMessage = new OutgoingMessage(Guid.NewGuid().ToString(), headers, body);
-                var operation = new TransportOperation(outgoingMessage, new UnicastAddressTag(serviceControlBackendAddress), deliveryConstraints: new[] { new DiscardIfNotReceivedBefore(timeToBeReceived) });
-                await messageSender.Dispatch(new TransportOperations(operation), new ContextBag()).ConfigureAwait(false);
+                var operation = new TransportOperation(outgoingMessage, new UnicastAddressTag(serviceControlBackendAddress), deliveryConstraints: new List<DeliveryConstraint> { new DiscardIfNotReceivedBefore(timeToBeReceived) });
+                await messageSender.Dispatch(new TransportOperations(operation), new TransportTransaction(), new ContextBag()).ConfigureAwait(false);
                 circuitBreaker.Success();
             }
             catch (Exception ex)
@@ -103,61 +103,45 @@
             if (TryGetErrorQueueAddress(out errorAddress))
             {
                 var qm = Parse(errorAddress);
-                return "Particular.ServiceControl"+ "@" + qm.Item2;
+                return "Particular.ServiceControl" + "@" + qm.Item2;
             }
 
-            if (VersionChecker.CoreVersionIsAtLeast(4, 1))
+            string auditAddress;
+            if (settings.TryGetAuditQueueAddress(out auditAddress))
             {
-                //audit config was added in 4.1
-                string address;
-                if (TryGetAuditAddress(out address))
-                {
-                    var qm = Parse(errorAddress);
-                    return "Particular.ServiceControl" + "@" + qm.Item2;
-                }
+                var qm = Parse(errorAddress);
+                return "Particular.ServiceControl" + "@" + qm.Item2;
             }
 
             return null;
         }
 
-
         bool TryGetErrorQueueAddress(out string address)
         {
-            var faultsForwarderConfig = settings.GetConfigSection<MessageForwardingInCaseOfFaultConfig>();
-            if (!string.IsNullOrEmpty(faultsForwarderConfig?.ErrorQueue))
+            try
             {
-                address = faultsForwarderConfig.ErrorQueue;
+                address = settings.ErrorQueueAddress();
                 return true;
             }
-            address = null;
-            return false;
-        }
-
-        bool TryGetAuditAddress(out string address)
-        {
-            var auditConfig = settings.GetConfigSection<AuditConfig>();
-            if (!string.IsNullOrEmpty(auditConfig?.QueueName))
+            catch
             {
-                address = auditConfig.QueueName;
-                return true;
+                address = null;
+                return false;
             }
-            address = null;
-
-            return false;
         }
 
         public async Task VerifyIfServiceControlQueueExists()
         {
             try
             {
-                // In order to verify if the queue exists, we are sending a control message to SC. 
+                // In order to verify if the queue exists, we are sending a control message to SC.
                 // If we are unable to send a message because the queue doesn't exist, then we can fail fast.
-                // We currently don't have a way to check if Queue exists in a transport agnostic way, 
+                // We currently don't have a way to check if Queue exists in a transport agnostic way,
                 // hence the send.
                 var outgoingMessage = ControlMessageFactory.Create(MessageIntentEnum.Send);
                 outgoingMessage.Headers[Headers.ReplyToAddress] = settings.LocalAddress();
                 var operation = new TransportOperation(outgoingMessage, new UnicastAddressTag(serviceControlBackendAddress));
-                await messageSender.Dispatch(new TransportOperations(operation), new ContextBag()).ConfigureAwait(false);
+                await messageSender.Dispatch(new TransportOperations(operation), new TransportTransaction(), new ContextBag()).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

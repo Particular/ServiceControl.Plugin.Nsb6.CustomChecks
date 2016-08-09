@@ -6,7 +6,7 @@
     using NServiceBus;
     using NServiceBus.Features;
     using NServiceBus.Settings;
-    using NServiceBus.Transports;
+    using NServiceBus.Transport;
 
     class CustomChecks : Feature
     {

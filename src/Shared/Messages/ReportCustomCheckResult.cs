@@ -38,7 +38,7 @@
         {
             HostId = settings.Get<Guid>("NServiceBus.HostInformation.HostId");
             Host = settings.Get<string>("NServiceBus.HostInformation.DisplayName");
-            EndpointName = settings.EndpointName().ToString();
+            EndpointName = settings.EndpointName();
         }
     }
 }
