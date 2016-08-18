@@ -109,7 +109,7 @@
             string auditAddress;
             if (settings.TryGetAuditQueueAddress(out auditAddress))
             {
-                var qm = Parse(errorAddress);
+                var qm = Parse(auditAddress);
                 return "Particular.ServiceControl" + "@" + qm.Item2;
             }
 
