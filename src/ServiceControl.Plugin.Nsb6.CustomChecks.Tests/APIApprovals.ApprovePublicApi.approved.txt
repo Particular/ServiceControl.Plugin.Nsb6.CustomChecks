@@ -24,6 +24,7 @@ namespace ServiceControl.Plugin.CustomChecks
             "removed in version 1.1.0.", true)]
         public void ReportPass() { }
     }
+    [JetBrains.Annotations.UsedImplicitlyAttribute(JetBrains.Annotations.ImplicitUseTargetFlags.Default | JetBrains.Annotations.ImplicitUseTargetFlags.Itself | JetBrains.Annotations.ImplicitUseTargetFlags.Members | JetBrains.Annotations.ImplicitUseTargetFlags.WithMembers)]
     public interface ICustomCheck
     {
         string Category { get; }
