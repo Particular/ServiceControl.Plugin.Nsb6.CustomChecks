@@ -29,7 +29,7 @@
             Assert.That(context.ReportedAt, Is.EqualTo(DateTime.UtcNow).Within(TimeSpan.FromMinutes(3.0)));
         }
 
-        public class Context : ScenarioContext
+        class Context : ScenarioContext
         {
             public bool WasCalled { get; set; }
 
