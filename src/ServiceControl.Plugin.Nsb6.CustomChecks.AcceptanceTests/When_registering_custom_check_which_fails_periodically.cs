@@ -29,14 +29,11 @@
             Assert.That(context.ReportedAt, Is.EqualTo(DateTime.UtcNow).Within(TimeSpan.FromMinutes(3.0)));
         }
 
-        public class Context : ScenarioContext
+        class Context : ScenarioContext
         {
             private long times;
 
-            public long Times
-            {
-                get { return Interlocked.Read(ref times); }
-            }
+            public long Times => Interlocked.Read(ref times);
 
             public Guid Id { get; set; }
 
