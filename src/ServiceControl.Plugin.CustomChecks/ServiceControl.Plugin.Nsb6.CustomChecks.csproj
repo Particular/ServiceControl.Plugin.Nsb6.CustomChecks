@@ -83,6 +83,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="obsoletes.cs" />
     <Compile Include="RepeatedFailuresOverTimeCircuitBreaker.cs" />
+    <Compile Include="Properties\Resharper.Annotations.g.cs" />
     <Compile Include="SimpleMessageMapper.cs" />
     <Compile Include="TimerBasedPeriodicCheck.cs" />
   </ItemGroup>

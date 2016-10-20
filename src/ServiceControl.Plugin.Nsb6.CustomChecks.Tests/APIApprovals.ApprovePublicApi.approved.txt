@@ -7,6 +7,13 @@ namespace NServiceBus
         public static void CustomCheckPlugin(this NServiceBus.EndpointConfiguration config, string serviceControlQueue) { }
     }
 }
+namespace ServiceControl.Features
+{
+    public class CustomChecks : NServiceBus.Features.Feature
+    {
+        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
+    }
+}
 namespace ServiceControl.Plugin.CustomChecks
 {
     public class CheckResult
@@ -31,10 +38,7 @@ namespace ServiceControl.Plugin.CustomChecks
             "removed in version 3.0.0.", true)]
         public void ReportPass() { }
     }
-    public class CustomChecks : NServiceBus.Features.Feature
-    {
-        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
-    }
+    [JetBrains.Annotations.UsedImplicitlyAttribute(JetBrains.Annotations.ImplicitUseTargetFlags.Default | JetBrains.Annotations.ImplicitUseTargetFlags.Itself | JetBrains.Annotations.ImplicitUseTargetFlags.Members | JetBrains.Annotations.ImplicitUseTargetFlags.WithMembers)]
     public interface ICustomCheck
     {
         string Category { get; }
