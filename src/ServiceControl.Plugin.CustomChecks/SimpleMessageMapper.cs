@@ -15,8 +15,7 @@ namespace ServiceControl.Plugin
         T IMessageCreator.CreateInstance<T>(Action<T> action)
         {
             var result = (T)((IMessageCreator)this).CreateInstance(typeof(T));
-            if (action != null)
-                action(result);
+            action?.Invoke(result);
 
             return result;
         }

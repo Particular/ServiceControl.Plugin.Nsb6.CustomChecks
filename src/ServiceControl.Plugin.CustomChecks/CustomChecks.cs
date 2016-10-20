@@ -1,4 +1,4 @@
-﻿namespace ServiceControl.Plugin.CustomChecks
+﻿namespace ServiceControl.Features
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -7,14 +7,20 @@
     using NServiceBus.Features;
     using NServiceBus.Settings;
     using NServiceBus.Transport;
+    using ServiceControl.Plugin;
+    using ServiceControl.Plugin.CustomChecks;
 
-    class CustomChecks : Feature
+    /// <summary>
+    /// The ServiceControl.CustomChecks plugin.
+    /// </summary>
+    public class CustomChecks : Feature
     {
-        public CustomChecks()
+        internal CustomChecks()
         {
             EnableByDefault();
         }
 
+        /// <summary>Called when the features is activated.</summary>
         protected override void Setup(FeatureConfigurationContext context)
         {
             context.Settings.GetAvailableTypes()

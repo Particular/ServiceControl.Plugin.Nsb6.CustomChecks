@@ -1,13 +1,13 @@
 ﻿namespace ServiceControl.Plugin.Nsb6.CustomChecks.AcceptanceTests
 {
     using System;
-    using System.Configuration;
     using System.Threading.Tasks;
     using NServiceBus;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
+    using ServiceControl.Features;
     using ServiceControl.Plugin.CustomChecks;
     using ServiceControl.Plugin.CustomChecks.Messages;
 
@@ -45,10 +45,12 @@
         {
             public Sender()
             {
-                var receiverEndpoint = NServiceBus.AcceptanceTesting.Customization.Conventions.EndpointNamingConvention(typeof(FakeServiceControl));
-                ConfigurationManager.AppSettings[@"ServiceControl/Queue"] = receiverEndpoint;
+                EndpointSetup<DefaultServer>(c =>
+                {
+                    var receiverEndpoint = NServiceBus.AcceptanceTesting.Customization.Conventions.EndpointNamingConvention(typeof(FakeServiceControl));
 
-                EndpointSetup<DefaultServer>();
+                    c.CustomCheckPlugin(receiverEndpoint);
+                });
             }
 
             class FailingCustomCheck : CustomCheck
@@ -69,7 +71,11 @@
         {
             public FakeServiceControl()
             {
-                EndpointSetup<DefaultServer>(c => c.UseSerialization<JsonSerializer>());
+                EndpointSetup<DefaultServer>(c =>
+                {
+                    c.DisableFeature<CustomChecks>();
+                    c.UseSerialization<JsonSerializer>();
+                });
             }
 
             public class MyMessageHandler : IHandleMessages<ReportCustomCheckResult>

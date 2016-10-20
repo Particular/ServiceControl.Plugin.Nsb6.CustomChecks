@@ -26,7 +26,8 @@
     <Prefer32Bit>false</Prefer32Bit>
     <DocumentationFile>bin\Debug\ServiceControl.Plugin.Nsb6.CustomChecks.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>618,1591</NoWarn>
+    <NoWarn>
+    </NoWarn>
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -39,7 +40,8 @@
     <Prefer32Bit>false</Prefer32Bit>
     <DocumentationFile>bin\Release\ServiceControl.Plugin.Nsb6.CustomChecks.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>618,1591</NoWarn>
+    <NoWarn>
+    </NoWarn>
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
@@ -75,6 +77,7 @@
     <Compile Include="AsyncTimer.cs" />
     <Compile Include="CustomCheck.cs" />
     <Compile Include="CheckResult.cs" />
+    <Compile Include="CustomCheckPluginExtensions.cs" />
     <Compile Include="CustomChecks.cs" />
     <Compile Include="ICustomCheck.cs" />
     <Compile Include="AssemblyInfo.cs" />

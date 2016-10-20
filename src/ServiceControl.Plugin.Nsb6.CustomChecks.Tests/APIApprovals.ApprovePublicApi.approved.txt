@@ -1,5 +1,12 @@
 ﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("ServiceControl.UnitTests")]
 [assembly: System.Runtime.Versioning.TargetFrameworkAttribute(".NETFramework,Version=v4.5.2", FrameworkDisplayName=".NET Framework 4.5.2")]
+namespace NServiceBus
+{
+    public class static CustomCheckPluginExtensions
+    {
+        public static void CustomCheckPlugin(this NServiceBus.EndpointConfiguration config, string serviceControlQueue) { }
+    }
+}
 namespace ServiceControl.Plugin.CustomChecks
 {
     public class CheckResult
@@ -18,11 +25,15 @@ namespace ServiceControl.Plugin.CustomChecks
         public System.Nullable<System.TimeSpan> Interval { get; }
         public abstract System.Threading.Tasks.Task<ServiceControl.Plugin.CustomChecks.CheckResult> PerformCheck();
         [System.ObsoleteAttribute("Please use `Use CheckResult.Failed(string reason) directly inside PerformCheck.` " +
-            "instead. Will be removed in version 1.1.0.", true)]
+            "instead. Will be removed in version 3.0.0.", true)]
         public void ReportFailed(string failureReason) { }
         [System.ObsoleteAttribute("Please use `Use CheckResult.Pass directly inside PerformCheck.` instead. Will be " +
-            "removed in version 1.1.0.", true)]
+            "removed in version 3.0.0.", true)]
         public void ReportPass() { }
+    }
+    public class CustomChecks : NServiceBus.Features.Feature
+    {
+        protected override void Setup(NServiceBus.Features.FeatureConfigurationContext context) { }
     }
     public interface ICustomCheck
     {
@@ -32,7 +43,7 @@ namespace ServiceControl.Plugin.CustomChecks
         System.Threading.Tasks.Task<ServiceControl.Plugin.CustomChecks.CheckResult> PerformCheck();
     }
     [System.ObsoleteAttribute("Please use `Inherit from CustomCheck and set repeatAfter in the CustomCheck const" +
-        "ructor to the desired interval.` instead. Will be removed in version 1.1.0.", true)]
+        "ructor to the desired interval.` instead. Will be removed in version 3.0.0.", true)]
     public abstract class PeriodicCheck
     {
         protected PeriodicCheck() { }
