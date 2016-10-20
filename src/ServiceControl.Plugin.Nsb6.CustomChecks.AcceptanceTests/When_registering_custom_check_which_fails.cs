@@ -7,6 +7,7 @@
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
+    using ServiceControl.Features;
     using ServiceControl.Plugin.CustomChecks;
     using ServiceControl.Plugin.CustomChecks.Messages;
 
