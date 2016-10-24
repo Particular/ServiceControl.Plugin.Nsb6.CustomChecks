@@ -43,6 +43,11 @@
 
             protected override async Task OnStart(IMessageSession session)
             {
+                if (!customChecks.Any())
+                {
+                    return;
+                }
+
                 timerPeriodicChecks = new List<TimerBasedPeriodicCheck>(customChecks.Count);
                 serviceControlBackend = new ServiceControlBackend(dispatchMessages, settings, criticalError);
                 await serviceControlBackend.VerifyIfServiceControlQueueExists().ConfigureAwait(false);
@@ -58,7 +63,7 @@
 
             protected override Task OnStop(IMessageSession session)
             {
-                return Task.WhenAll(timerPeriodicChecks.Select(t => t.Stop()).ToArray());
+                return customChecks.Any() ? Task.WhenAll(timerPeriodicChecks.Select(t => t.Stop()).ToArray()) : Task.FromResult(0);
             }
 
             readonly CriticalError criticalError;

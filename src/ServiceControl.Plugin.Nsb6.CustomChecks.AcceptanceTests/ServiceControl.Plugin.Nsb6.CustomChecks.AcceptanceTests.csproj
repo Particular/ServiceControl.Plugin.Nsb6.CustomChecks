@@ -64,6 +64,7 @@
     <Compile Include="EndpointTemplates\EndpointCustomizationConfigurationExtensions.cs" />
     <Compile Include="ReportCustomCheckResult.cs" />
     <Compile Include="ScenarioDescriptors\EnvironmentHelper.cs" />
+    <Compile Include="When_no_custom_checks_exist.cs" />
     <Compile Include="When_registering_custom_check_which_fails.cs" />
     <Compile Include="EndpointTemplates\ConfigureExtensions.cs" />
     <Compile Include="EndpointTemplates\DefaultServer.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="When_registering_custom_check_which_fails_periodically.cs" />
     <Compile Include="When_registering_custom_check_which_succeeds.cs" />
     <Compile Include="When_registering_custom_check_which_succeeds_periodically.cs" />
+    <Compile Include="When_servicecontrol_queue_is_not_set.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
