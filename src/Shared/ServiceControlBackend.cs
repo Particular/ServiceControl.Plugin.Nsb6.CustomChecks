@@ -104,7 +104,7 @@
             }
 
             const string errMsg = @"You have ServiceControl plugins installed in your endpoint, however, the Particular ServiceControl queue is not specified.
-Please ensure that the Particular ServiceControl queue is specified either via code (config.CustomChecksPlugin(servicecontrolQueue)) or AppSettings (eg. <add key=""ServiceControl/Queue"" value=""particular.servicecontrol@machine""/>).";
+Please ensure that the Particular ServiceControl queue is specified either via code (endpointConfiguration.CustomCheckPlugin(\"particular.servicecontrol@machine\")) or AppSettings (eg. <add key=""ServiceControl/Queue"" value=""particular.servicecontrol@machine""/>).";
 
             throw new Exception(errMsg);
         }
