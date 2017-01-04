@@ -44,6 +44,10 @@
     </NoWarn>
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>  
   <ItemGroup>
     <Reference Include="Janitor, Version=1.1.4.0, Culture=neutral, PublicKeyToken=d34c7d3bba3746e6, processorArchitecture=MSIL">
       <HintPath>..\packages\Janitor.Fody.1.1.4.0\lib\dotnet\Janitor.dll</HintPath>
