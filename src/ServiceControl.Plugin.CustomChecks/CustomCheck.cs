@@ -6,7 +6,7 @@
     /// <summary>
     /// Abstract class to define a custom check implementation.
     /// </summary>
-    public abstract partial class CustomCheck : ICustomCheck
+    public abstract class CustomCheck : ICustomCheck
     {
         /// <summary>
         /// Constructor to initialize a custom check.
