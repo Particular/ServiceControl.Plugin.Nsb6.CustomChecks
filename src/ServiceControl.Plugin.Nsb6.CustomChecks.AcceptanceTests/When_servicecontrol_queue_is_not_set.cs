@@ -13,12 +13,12 @@ namespace ServiceControl.Plugin.Nsb6.CustomChecks.AcceptanceTests
         [Test]
         public void The_endpoint_should_not_start_with_custom_checks()
         {
-            var ex = Assert.ThrowsAsync<AggregateException>(async () => await Scenario.Define<Context>()
+            var ex = Assert.ThrowsAsync<Exception>(async () => await Scenario.Define<Context>()
                 .WithEndpoint<Sender>()
                 .Run());
 
             // ReSharper disable once PossibleNullReferenceException
-            Assert.IsTrue(ex.InnerExceptions[0].InnerException.Message.Contains("ServiceControl queue is not specified"));
+            Assert.IsTrue(ex.Message.Contains("ServiceControl queue is not specified"));
         }
 
         class Context : ScenarioContext
