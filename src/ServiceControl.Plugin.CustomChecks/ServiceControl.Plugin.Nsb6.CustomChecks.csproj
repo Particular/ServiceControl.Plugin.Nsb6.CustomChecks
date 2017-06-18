@@ -19,6 +19,7 @@
     <PackageReference Include="NuGetPackager" Version="0.6.3" />
     <PackageReference Include="Obsolete.Fody" Version="4.2.2" />
     <PackageReference Include="Janitor.Fody" Version="1.4.1" />
+    <PackageReference Include="Fody" Version="2.1.0" />
     <Reference Include="System.configuration" />
     <Compile Include="..\Shared\Messages\ReportCustomCheckResult.cs" Link="Messages\ReportCustomCheckResult.cs"/>
     <Compile Include="..\Shared\ServiceControlBackend.cs" Link="ServiceControlBackend.cs" />
