@@ -15,10 +15,10 @@
     <copyright>$copyright$</copyright>
     <tags>$tags$</tags>
     <dependencies>
-		<dependency id="NServiceBus" version="[6.0.0, 7.0.0)" />
+        <dependency id="NServiceBus" version="[6.0.0, 7.0.0)" />
     </dependencies>
   </metadata>
   <files>
-    <file src="..\..\src\ServiceControl.Plugin.CustomChecks\bin\Release\ServiceControl.Plugin.Nsb6.CustomChecks.*" target="lib\net452" />
+    <file src="..\..\binaries\net452\ServiceControl.Plugin.Nsb6.CustomChecks.*" target="lib\net452" />
   </files>
 </package>

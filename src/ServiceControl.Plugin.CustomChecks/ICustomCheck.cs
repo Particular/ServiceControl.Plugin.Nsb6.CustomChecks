@@ -2,12 +2,10 @@
 {
     using System;
     using System.Threading.Tasks;
-    using JetBrains.Annotations;
 
     /// <summary>
     /// Interface to implement a custom check.
     /// </summary>
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public interface ICustomCheck
     {
         /// <summary>

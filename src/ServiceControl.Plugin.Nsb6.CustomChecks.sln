@@ -1,18 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Plugin.Nsb6.CustomChecks", "ServiceControl.Plugin.CustomChecks\ServiceControl.Plugin.Nsb6.CustomChecks.csproj", "{6526946E-5299-441A-9EC7-C85306FB5F51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Plugin.Nsb6.CustomChecks", "ServiceControl.Plugin.CustomChecks\ServiceControl.Plugin.Nsb6.CustomChecks.csproj", "{6526946E-5299-441A-9EC7-C85306FB5F51}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1D5412EE-73ED-4752-AEDA-AEB707A97C40}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\packages.config = .nuget\packages.config
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Plugin.Nsb6.CustomChecks.AcceptanceTests", "ServiceControl.Plugin.Nsb6.CustomChecks.AcceptanceTests\ServiceControl.Plugin.Nsb6.CustomChecks.AcceptanceTests.csproj", "{D1E7266A-1FB8-4677-99E4-D98989076723}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Plugin.Nsb6.CustomChecks.AcceptanceTests", "ServiceControl.Plugin.Nsb6.CustomChecks.AcceptanceTests\ServiceControl.Plugin.Nsb6.CustomChecks.AcceptanceTests.csproj", "{D1E7266A-1FB8-4677-99E4-D98989076723}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Plugin.Nsb6.CustomChecks.Tests", "ServiceControl.Plugin.Nsb6.CustomChecks.Tests\ServiceControl.Plugin.Nsb6.CustomChecks.Tests.csproj", "{965889A7-FB89-4FE1-9D1F-802741254392}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Plugin.Nsb6.CustomChecks.Tests", "ServiceControl.Plugin.Nsb6.CustomChecks.Tests\ServiceControl.Plugin.Nsb6.CustomChecks.Tests.csproj", "{965889A7-FB89-4FE1-9D1F-802741254392}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
