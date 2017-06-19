@@ -7,8 +7,8 @@
     using NServiceBus.Features;
     using NServiceBus.Settings;
     using NServiceBus.Transport;
-    using ServiceControl.Plugin;
-    using ServiceControl.Plugin.CustomChecks;
+    using Plugin;
+    using Plugin.CustomChecks;
 
     /// <summary>
     /// The ServiceControl.CustomChecks plugin.

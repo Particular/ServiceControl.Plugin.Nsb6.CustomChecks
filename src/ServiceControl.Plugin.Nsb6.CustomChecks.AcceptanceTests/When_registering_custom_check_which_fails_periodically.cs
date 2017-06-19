@@ -8,9 +8,9 @@
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
-    using ServiceControl.Features;
-    using ServiceControl.Plugin.CustomChecks;
-    using ServiceControl.Plugin.CustomChecks.Messages;
+    using Features;
+    using Plugin.CustomChecks;
+    using Plugin.CustomChecks.Messages;
 
     public class When_registering_custom_check_which_fails_periodically : NServiceBusAcceptanceTest
     {

@@ -10,8 +10,7 @@
     {
         public static Task DefineTransport(this EndpointConfiguration config, RunSettings settings, string endpointName)
         {
-            Type transportType;
-            if (!settings.TryGet("Transport", out transportType))
+            if (!settings.TryGet("Transport", out Type _))
             {
                 settings.Merge(Transports.Default.Settings);
             }
@@ -21,8 +20,7 @@
 
         public static Task DefinePersistence(this EndpointConfiguration config, RunSettings settings, string endpointName)
         {
-            Type persistenceType;
-            if (!settings.TryGet("Persistence", out persistenceType))
+            if (!settings.TryGet("Persistence", out Type _))
             {
                 settings.Merge(Persistence.Default.Settings);
             }
