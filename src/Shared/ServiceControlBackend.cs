@@ -16,8 +16,8 @@
     using NServiceBus.Settings;
     using NServiceBus.Transport;
     using NServiceBus.Unicast.Transport;
-    using ServiceControl.Plugin.CustomChecks;
-    using ServiceControl.Plugin.CustomChecks.Messages;
+    using CustomChecks;
+    using CustomChecks.Messages;
 
     class ServiceControlBackend
     {

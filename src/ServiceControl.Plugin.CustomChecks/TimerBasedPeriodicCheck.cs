@@ -3,7 +3,7 @@ namespace ServiceControl.Plugin.CustomChecks
     using System;
     using System.Threading.Tasks;
     using NServiceBus.Logging;
-    using ServiceControl.Plugin.CustomChecks.Messages;
+    using Messages;
 
     class TimerBasedPeriodicCheck
     {

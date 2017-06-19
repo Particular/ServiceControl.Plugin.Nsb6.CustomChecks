@@ -6,7 +6,7 @@ namespace ServiceControl.Plugin.Nsb6.CustomChecks.AcceptanceTests
     using NServiceBus.AcceptanceTests;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NUnit.Framework;
-    using ServiceControl.Plugin.CustomChecks;
+    using Plugin.CustomChecks;
 
     class When_servicecontrol_queue_is_not_set : NServiceBusAcceptanceTest
     {
