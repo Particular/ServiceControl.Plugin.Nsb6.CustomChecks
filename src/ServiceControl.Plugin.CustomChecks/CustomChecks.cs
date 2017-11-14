@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using NServiceBus;
     using NServiceBus.Features;
+    using NServiceBus.Logging;
     using NServiceBus.Settings;
     using NServiceBus.Transport;
     using Plugin;
@@ -15,6 +16,8 @@
     /// </summary>
     public class CustomChecks : Feature
     {
+        static ILog Log = LogManager.GetLogger<CustomChecks>();
+
         internal CustomChecks()
         {
             EnableByDefault();
@@ -29,6 +32,8 @@
                 .ForEach(t => context.Container.ConfigureComponent(t, DependencyLifecycle.InstancePerCall));
 
             context.RegisterStartupTask(b => new CustomChecksStartup(b.BuildAll<ICustomCheck>(), context.Settings, b.Build<CriticalError>(), b.Build<IDispatchMessages>()));
+
+            Log.Warn("The ServiceControl.Plugin.Nsb6.CustomChecks package has been replaced by the NServiceBus.CustomChecks package. See the upgrade guide for more details.");
         }
 
         class CustomChecksStartup : FeatureStartupTask
